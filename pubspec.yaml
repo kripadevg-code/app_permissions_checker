@@ -1,0 +1,56 @@
+name: app_permissions_checker
+description: >
+  A comprehensive Flutter plugin for Android app permission analysis. Check permissions, 
+  assess security risks, and get detailed insights with beautiful Material 3 UI examples.
+version: 1.0.0
+# Repository information
+homepage: https://github.com/kripadevg-code/app_permissions_checker
+repository: https://github.com/kripadevg-code/app_permissions_checker
+issue_tracker: https://github.com/kripadevg-code/app_permissions_checker/issues
+documentation: https://pub.dev/documentation/app_permissions_checker/latest/
+
+# Funding and support
+funding:
+  - https://github.com/sponsors/kripadevg-code
+  - https://www.buymeacoffee.com/kripadevg-code
+
+# Topics for discoverability (max 5 recommended)
+topics:
+  - android
+  - permissions
+  - security
+  - privacy
+  - plugin
+
+# Note: Add screenshots later when files exist in repository to avoid missing-asset warnings
+# screenshots:
+#   - description: 'Beautiful Material 3 dashboard with permission insights'
+#     path: screenshots/dashboard.png
+#   - description: 'Comprehensive app list with filtering and search'
+#     path: screenshots/app_list.png
+#   - description: 'Detailed permission analysis with risk assessment'
+#     path: screenshots/permission_details.png
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.7
+
+dev_dependencies:
+  build_runner: ^2.4.7
+  flutter_lints: ^4.0.0
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.4.4
+
+# Platform plugin configuration
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.app_permissions.app_permissions_checker
+        pluginClass: AppPermissionsCheckerPlugin
