@@ -16,16 +16,15 @@
 ## 📱 Screenshots
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/dashboard.png" width="200" alt="Dashboard" />
-  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/app_list.png" width="200" alt="App List" />
-  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/permission_details.png" width="200" alt="Permission Details" />
-  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/risk_assessment.png" width="200" alt="Risk Assessment" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/app_list.png"  width="150"  alt="App List" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/permission_details.png"  width="150"  alt="Permission Details" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/risk_assessment.png"  width="150"  alt="Risk Assessment" />
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/filters.png" width="200" alt="Filters" />
-  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/search.png" width="200" alt="Search" />
-  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/dark_mode.png" width="200" alt="Dark Mode" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/filters.png"  width="150"  alt="Filters" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/search.png"  width="150"  alt="Search" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/dark_mode.png"  width="150"  alt="Dark Mode" />
 </p>
 
 ---
