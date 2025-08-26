@@ -10,8 +10,23 @@
   
   <br>
   
-  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/demo.gif" alt="App Permissions Checker Demo" width="300">
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/dashboard.png" alt="App Permissions Checker Dashboard" width="300">
 </div>
+
+## 📱 Screenshots
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/dashboard.png" width="200" alt="Dashboard" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/app_list.png" width="200" alt="App List" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/permission_details.png" width="200" alt="Permission Details" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/risk_assessment.png" width="200" alt="Risk Assessment" />
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/filters.png" width="200" alt="Filters" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/search.png" width="200" alt="Search" />
+  <img src="https://raw.githubusercontent.com/kripadevg-code/app_permissions_checker/main/screenshots/dark_mode.png" width="200" alt="Dark Mode" />
+</p>
 
 ---
 
@@ -21,16 +36,16 @@
 
 ### ✨ Key Features
 
-| Feature | Description | Status |
-|---------|-------------|---------|
-| 🎯 **Targeted Analysis** | Check permissions for specific apps by package name | ✅ |
-| 📱 **Bulk Scanning** | Get permissions for all installed apps at once | ✅ |
-| 🔍 **Smart Filtering** | Filter by system apps, permission types, and status | ✅ |
-| 🚨 **Risk Assessment** | Identify dangerous permissions and security risks | ✅ |
-| 📊 **Detailed Insights** | Protection levels, categories, and grant status | ✅ |
-| 🎨 **Beautiful UI** | Modern Material 3 example app included | ✅ |
-| 🛡️ **Null Safety** | Full null safety support for robust apps | ✅ |
-| 📚 **Rich Documentation** | Comprehensive docs with examples | ✅ |
+| Feature                   | Description                                         | Status |
+| ------------------------- | --------------------------------------------------- | ------ |
+| 🎯 **Targeted Analysis**  | Check permissions for specific apps by package name | ✅     |
+| 📱 **Bulk Scanning**      | Get permissions for all installed apps at once      | ✅     |
+| 🔍 **Smart Filtering**    | Filter by system apps, permission types, and status | ✅     |
+| 🚨 **Risk Assessment**    | Identify dangerous permissions and security risks   | ✅     |
+| 📊 **Detailed Insights**  | Protection levels, categories, and grant status     | ✅     |
+| 🎨 **Beautiful UI**       | Modern Material 3 example app included              | ✅     |
+| 🛡️ **Null Safety**        | Full null safety support for robust apps            | ✅     |
+| 📚 **Rich Documentation** | Comprehensive docs with examples                    | ✅     |
 
 ---
 
@@ -56,7 +71,7 @@ flutter pub get
 Add the following permission to your `android/app/src/main/AndroidManifest.xml`:
 
 ```xml
-<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" 
+<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
     tools:ignore="QueryAllPackagesPermission" />
 ```
 
@@ -96,7 +111,7 @@ final allApps = await AppPermissionsChecker.getAllAppsPermissions(
 print('Found ${allApps.length} user apps');
 
 // Find apps with camera permission
-final cameraApps = allApps.where((app) => 
+final cameraApps = allApps.where((app) =>
   app.hasPermission('android.permission.CAMERA')
 ).toList();
 
@@ -118,7 +133,7 @@ final locationApps = await AppPermissionsChecker.getAllAppsPermissions(
 for (final app in locationApps) {
   final categories = app.permissionsByCategory;
   print('\n${app.appName}:');
-  
+
   categories.forEach((category, permissions) {
     final granted = permissions.where((p) => p.granted).length;
     print('  $category: $granted/${permissions.length} granted');
@@ -138,7 +153,7 @@ final riskyApps = apps.where((app) {
 }).toList();
 
 // Sort by risk level
-riskyApps.sort((a, b) => 
+riskyApps.sort((a, b) =>
   b.grantedDangerousPermissions.length.compareTo(
     a.grantedDangerousPermissions.length
   )
@@ -155,9 +170,9 @@ for (final app in riskyApps.take(5)) {
 ```dart
 class PermissionsList extends StatelessWidget {
   final AppPermissionInfo app;
-  
+
   const PermissionsList({Key? key, required this.app}) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -173,8 +188,8 @@ class PermissionsList extends StatelessWidget {
           subtitle: Text(permission.permission),
           trailing: Chip(
             label: Text(permission.protectionLevel),
-            backgroundColor: permission.isDangerous 
-              ? Colors.red.shade100 
+            backgroundColor: permission.isDangerous
+              ? Colors.red.shade100
               : Colors.blue.shade100,
           ),
         );
@@ -191,35 +206,43 @@ class PermissionsList extends StatelessWidget {
 ### Core Methods
 
 #### `checkPermissions(List<String> packageNames, {bool includeSystemApps})`
+
 Check permissions for specific apps by package names.
 
 **Parameters:**
+
 - `packageNames`: List of package names to analyze
 - `includeSystemApps`: Include system apps in results (default: false)
 
 **Returns:** `Future<List<AppPermissionInfo>>`
 
 #### `checkSingleAppPermissions(String packageName)`
+
 Check permissions for a single app.
 
 **Parameters:**
+
 - `packageName`: Package name to analyze
 
 **Returns:** `Future<AppPermissionInfo?>`
 
 #### `getAllAppsPermissions({bool includeSystemApps, List<String> filterByPermissions})`
+
 Get all installed apps with their permissions.
 
 **Parameters:**
+
 - `includeSystemApps`: Include system apps (default: false)
 - `filterByPermissions`: Filter apps by specific permissions
 
 **Returns:** `Future<List<AppPermissionInfo>>`
 
 #### `isPermissionGranted(String packageName, String permission)`
+
 Check if a specific permission is granted.
 
 **Parameters:**
+
 - `packageName`: Package name to check
 - `permission`: Permission to verify
 
@@ -228,6 +251,7 @@ Check if a specific permission is granted.
 ### Data Models
 
 #### `AppPermissionInfo`
+
 Comprehensive app information with permissions.
 
 ```dart
@@ -239,7 +263,7 @@ class AppPermissionInfo {
   final List<PermissionDetail> permissions; // All permissions
   final bool isSystemApp;           // System app flag
   final DateTime? installTime;      // Installation date
-  
+
   // Convenience getters
   List<PermissionDetail> get grantedPermissions;
   List<PermissionDetail> get deniedPermissions;
@@ -249,6 +273,7 @@ class AppPermissionInfo {
 ```
 
 #### `PermissionDetail`
+
 Detailed permission information.
 
 ```dart
@@ -258,7 +283,7 @@ class PermissionDetail {
   final bool granted;              // Grant status
   final String protectionLevel;    // Protection level
   final String category;           // Permission category
-  
+
   // Convenience getters
   bool get isDangerous;
   bool get isNormal;
@@ -310,12 +335,12 @@ flutter run
 
 ## 🛠️ Platform Support
 
-| Platform | Support | Min Version |
-|----------|---------|-------------|
-| Android | ✅ Full | API 21+ (Android 5.0) |
-| iOS | ❌ Not Available | - |
-| Web | ❌ Not Available | - |
-| Desktop | ❌ Not Available | - |
+| Platform | Support          | Min Version           |
+| -------- | ---------------- | --------------------- |
+| Android  | ✅ Full          | API 21+ (Android 5.0) |
+| iOS      | ❌ Not Available | -                     |
+| Web      | ❌ Not Available | -                     |
+| Desktop  | ❌ Not Available | -                     |
 
 > **Note:** This plugin is Android-specific due to platform limitations on permission querying.
 

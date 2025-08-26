@@ -22,7 +22,8 @@ class AppPermissionsCheckerPlugin: FlutterPlugin, MethodCallHandler {
 
   // Background executor to avoid blocking the main thread
   private val executor = Executors.newFixedThreadPool(2)
-  private val mainHandler = Handler(Looper.getMainLooper())
+  // Lazily initialize to avoid Android Looper dependency during plain JVM unit tests
+  private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "app_permissions_checker")
@@ -32,6 +33,10 @@ class AppPermissionsCheckerPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     when (call.method) {
+      // For backward compatibility with the template test
+      "getPlatformVersion" -> {
+        result.success("Android " + Build.VERSION.RELEASE)
+      }
       "checkPermissions" -> {
         val packageNames = call.argument<List<String>>("packageNames") ?: emptyList()
         val includeSystemApps = call.argument<Boolean>("includeSystemApps") ?: false
@@ -83,10 +88,20 @@ class AppPermissionsCheckerPlugin: FlutterPlugin, MethodCallHandler {
     executor.execute {
       try {
         val r = task()
-        mainHandler.post { onSuccess(r) }
+        postToMain { onSuccess(r) }
       } catch (e: Exception) {
-        mainHandler.post { onError(e) }
+        postToMain { onError(e) }
       }
+    }
+  }
+
+  // Post to main thread if available; otherwise run immediately (useful for JVM unit tests)
+  private fun postToMain(action: () -> Unit) {
+    val mainLooper = try { Looper.getMainLooper() } catch (_: Throwable) { null }
+    if (mainLooper != null) {
+      mainHandler.post(action)
+    } else {
+      action()
     }
   }
 
