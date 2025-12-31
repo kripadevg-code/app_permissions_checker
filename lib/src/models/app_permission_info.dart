@@ -9,13 +9,16 @@ class AppPermissionInfo {
     required this.appName,
     required this.packageName,
     required this.permissions,
-    required this.isSystemApp,
+    required this.isUpdatedSystemApp,
+    required this.isInternalApp,
+    required this.isExternalApp,
+    required this.installerSource,
     this.versionName,
     this.versionCode,
     this.installTime,
   });
 
-  /// Create an [AppPermissionInfo] from a loosely-typed map (from platform channels)
+  /// Create an [AppPermissionInfo] from a loosely-typed platform map
   factory AppPermissionInfo.fromMap(Map map) {
     final rawPerms = map['permissions'] as List? ?? const [];
     final permissionsList = rawPerms.map((p) => PermissionDetail.fromMap(p as Map)).toList();
@@ -25,9 +28,16 @@ class AppPermissionInfo {
       packageName: map['packageName'] as String? ?? '',
       versionName: map['versionName'] as String?,
       versionCode: (map['versionCode'] is int) ? map['versionCode'] as int : int.tryParse('${map['versionCode']}'),
+      isUpdatedSystemApp: map['isUpdatedSystemApp'] as bool? ?? false,
+      isInternalApp: map['isInternalApp'] as bool? ?? false,
+      isExternalApp: map['isExternalApp'] as bool? ?? false,
+      installerSource: map['installerSource'] as String? ?? '',
+      installTime: map['installTime'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (map['installTime'] as num).toInt(),
+            )
+          : null,
       permissions: permissionsList,
-      isSystemApp: map['isSystemApp'] as bool? ?? false,
-      installTime: map['installTime'] != null ? DateTime.fromMillisecondsSinceEpoch((map['installTime'] as num).toInt()) : null,
     );
   }
 
@@ -46,8 +56,17 @@ class AppPermissionInfo {
   /// List of all permissions requested by this app
   final List<PermissionDetail> permissions;
 
-  /// Whether this is a system app
-  final bool isSystemApp;
+  /// Whether this system app has been updated by the user
+  final bool isUpdatedSystemApp;
+
+  /// Whether this app is installed internally (system app)
+  final bool isInternalApp;
+
+  /// Whether this app is installed externally (user-installed)
+  final bool isExternalApp;
+
+  /// The source from which this app was installed
+  final String installerSource;
 
   /// When this app was first installed
   final DateTime? installTime;
@@ -58,9 +77,12 @@ class AppPermissionInfo {
         'packageName': packageName,
         'versionName': versionName,
         'versionCode': versionCode,
-        'permissions': permissions.map((p) => p.toMap()).toList(),
-        'isSystemApp': isSystemApp,
+        'isUpdatedSystemApp': isUpdatedSystemApp,
+        'isInternalApp': isInternalApp,
+        'isExternalApp': isExternalApp,
+        'installerSource': installerSource,
         'installTime': installTime?.millisecondsSinceEpoch,
+        'permissions': permissions.map((p) => p.toMap()).toList(),
       };
 
   /// Get only the permissions that are currently granted
@@ -78,16 +100,15 @@ class AppPermissionInfo {
   /// Check if this app has requested a specific permission
   bool hasPermission(String permission) => permissions.any((p) => p.permission == permission);
 
-  /// Check if a specific permission is granted for this app
+  /// Check if a specific permission is granted
   bool isPermissionGranted(String permission) => permissions.any((p) => p.permission == permission && p.granted);
 
-  /// Get permissions grouped by category
+  /// Group permissions by category
   Map<String, List<PermissionDetail>> get permissionsByCategory {
     final grouped = <String, List<PermissionDetail>>{};
 
     for (final permission in permissions) {
-      final category = permission.category;
-      grouped.putIfAbsent(category, () => []).add(permission);
+      grouped.putIfAbsent(permission.category, () => []).add(permission);
     }
 
     return grouped;
@@ -100,5 +121,6 @@ class AppPermissionInfo {
   int get hashCode => packageName.hashCode;
 
   @override
-  String toString() => 'AppPermissionInfo{appName: $appName, packageName: $packageName, permissions: ${permissions.length}}';
+  String toString() =>
+      ' AppPermissionInfo{appName: $appName, packageName: $packageName, versionName: $versionName, versionCode: $versionCode, isUpdatedSystemApp: $isUpdatedSystemApp, isInternalApp: $isInternalApp, isExternalApp: $isExternalApp, installerSource: $installerSource, installTime: $installTime, permissions: $permissions}';
 }

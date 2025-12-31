@@ -59,6 +59,7 @@ class MethodChannelAppPermissionsChecker extends AppPermissionsCheckerPlatform {
   @override
   Future<List<AppPermissionInfo>> getAllAppsPermissions({
     bool includeSystemApps = false,
+    bool onlyUsefulApps = false,
     List<String> filterByPermissions = const [],
   }) async {
     try {
@@ -66,6 +67,7 @@ class MethodChannelAppPermissionsChecker extends AppPermissionsCheckerPlatform {
         'getAllAppsPermissions',
         {
           'includeSystemApps': includeSystemApps,
+          'onlyUsefulApps': onlyUsefulApps,
           'filterByPermissions': filterByPermissions,
         },
       );

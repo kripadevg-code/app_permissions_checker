@@ -14,6 +14,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.util.concurrent.Executors
+import android.content.pm.ApplicationInfo    
 
 /** AppPermissionsCheckerPlugin */
 class AppPermissionsCheckerPlugin: FlutterPlugin, MethodCallHandler {
@@ -60,9 +61,10 @@ class AppPermissionsCheckerPlugin: FlutterPlugin, MethodCallHandler {
       }
       "getAllAppsPermissions" -> {
         val includeSystemApps = call.argument<Boolean>("includeSystemApps") ?: false
+        val onlyUsefulApps = call.argument<Boolean>("onlyUsefulApps") ?: false
         val filterByPermissions = call.argument<List<String>>("filterByPermissions") ?: emptyList()
         runAsync(
-          task = { getAllAppsPermissions(includeSystemApps, filterByPermissions) },
+          task = { getAllAppsPermissions(includeSystemApps, onlyUsefulApps, filterByPermissions) },
           onSuccess = { data -> result.success(data) },
           onError = { e -> result.error("PLUGIN_ERROR", e.message, null) }
         )
@@ -112,7 +114,7 @@ class AppPermissionsCheckerPlugin: FlutterPlugin, MethodCallHandler {
     for (packageName in packageNames) {
       try {
         val packageInfo = getPackageInfoCompat(packageName, PackageManager.GET_PERMISSIONS)
-        val appInfo = createAppInfoMap(packageInfo, packageManager, includeSystemApps)
+        val appInfo = createAppInfoMap(packageInfo, packageManager, includeSystemApps, false)
         if (appInfo != null) {
           results.add(appInfo)
         }
@@ -128,19 +130,19 @@ class AppPermissionsCheckerPlugin: FlutterPlugin, MethodCallHandler {
     return try {
       val packageManager = context.packageManager
       val packageInfo = getPackageInfoCompat(packageName, PackageManager.GET_PERMISSIONS)
-      createAppInfoMap(packageInfo, packageManager, true)
+      createAppInfoMap(packageInfo, packageManager, true, false)
     } catch (e: PackageManager.NameNotFoundException) {
       null
     }
   }
 
-  private fun getAllAppsPermissions(includeSystemApps: Boolean, filterByPermissions: List<String>): List<Map<String, Any>> {
+  private fun getAllAppsPermissions(includeSystemApps: Boolean, onlyUsefulApps: Boolean, filterByPermissions: List<String>): List<Map<String, Any>> {
     val packageManager = context.packageManager
     val apps = getInstalledPackagesCompat(PackageManager.GET_PERMISSIONS)
     val results = mutableListOf<Map<String, Any>>()
 
     for (packageInfo in apps) {
-      val appInfo = createAppInfoMap(packageInfo, packageManager, includeSystemApps)
+      val appInfo = createAppInfoMap(packageInfo, packageManager, includeSystemApps, onlyUsefulApps)
       if (appInfo != null) {
         if (filterByPermissions.isEmpty() || hasAnyPermission(packageInfo, filterByPermissions)) {
           results.add(appInfo)
@@ -150,45 +152,70 @@ class AppPermissionsCheckerPlugin: FlutterPlugin, MethodCallHandler {
 
     return results
   }
+ 
+private fun createAppInfoMap(
+  packageInfo: PackageInfo,
+  packageManager: PackageManager,
+  includeSystemApps: Boolean,
+  onlyUsefulApps: Boolean = false
+): Map<String, Any>? {
 
-  private fun createAppInfoMap(packageInfo: PackageInfo, packageManager: PackageManager, includeSystemApps: Boolean): Map<String, Any>? {
-    val ai = packageInfo.applicationInfo
-    val isSystemApp = (((ai?.flags) ?: 0) and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0
-    
-    if (!includeSystemApps && isSystemApp) {
-      return null
-    }
+  val isSystemApp = ((packageInfo.applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_SYSTEM) != 0
+  val isUpdatedSystemApp = ((packageInfo.applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+  val isUsefulApp = !isSystemApp || isUpdatedSystemApp
 
-    val appName = try {
-      val appInfo = packageInfo.applicationInfo
-      if (appInfo != null) packageManager.getApplicationLabel(appInfo).toString() else packageInfo.packageName
-    } catch (e: Exception) {
-      packageInfo.packageName
-    }
-
-    val permissions = packageInfo.requestedPermissions?.mapIndexed { index, permission ->
-      val isGranted = packageInfo.requestedPermissionsFlags?.get(index)?.let { flags ->
-        (flags and PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0
-      } ?: false
-
-      mapOf(
-        "permission" to permission,
-        "granted" to isGranted,
-        "protectionLevel" to getPermissionProtectionLevel(permission, packageManager),
-        "description" to getPermissionDescription(permission, packageManager)
-      )
-    } ?: emptyList()
-
-    return mapOf(
-      "appName" to appName,
-      "packageName" to packageInfo.packageName,
-      "versionName" to (packageInfo.versionName ?: "Unknown"),
-      "versionCode" to packageInfo.longVersionCode,
-      "permissions" to permissions,
-      "isSystemApp" to isSystemApp,
-      "installTime" to packageInfo.firstInstallTime
-    )
+  // Filter logic
+  if (!includeSystemApps && isSystemApp) {
+    return null
   }
+  
+  // onlyUsefulApps only works when includeSystemApps is true
+  if (includeSystemApps && onlyUsefulApps && isSystemApp && !isUpdatedSystemApp) {
+    return null
+  }
+
+  val installer = try {
+    packageManager.getInstallerPackageName(packageInfo.packageName)
+  } catch (_: Exception) { null }
+
+  val permissions = packageInfo.requestedPermissions?.mapIndexed { index, permission ->
+    val granted = packageInfo.requestedPermissionsFlags?.get(index)?.let { f ->
+      (f and PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0
+    } ?: false
+
+    mapOf(
+      "permission" to permission,
+      "granted" to granted,
+      "protectionLevel" to getPermissionProtectionLevel(permission, packageManager),
+      "description" to getPermissionDescription(permission, packageManager),
+      "readableName" to getReadablePermissionName(permission),
+      "category" to getPermissionCategory(permission)
+    )
+  } ?: emptyList()
+
+  val appName = try {
+    packageInfo.applicationInfo?.let { appInfo ->
+      packageManager.getApplicationLabel(appInfo).toString()
+    } ?: packageInfo.packageName
+  } catch (_: Exception) {
+    packageInfo.packageName
+  }
+
+  return mapOf(
+    "appName" to appName,
+    "packageName" to packageInfo.packageName,
+    "versionName" to (packageInfo.versionName ?: "Unknown"),
+    "versionCode" to packageInfo.longVersionCode,
+    "isUpdatedSystemApp" to isUpdatedSystemApp,
+    "isInternalApp" to isSystemApp,
+    "isExternalApp" to !isSystemApp,
+    "installerSource" to (installer ?: ""),
+    "installTime" to packageInfo.firstInstallTime,
+    "permissions" to permissions
+  )
+}
+
+  
 
   private fun getPermissionProtectionLevel(permission: String, packageManager: PackageManager): String {
     return try {
@@ -211,6 +238,24 @@ class AppPermissionsCheckerPlugin: FlutterPlugin, MethodCallHandler {
       permissionInfo.loadDescription(packageManager)?.toString()
     } catch (e: Exception) {
       null
+    }
+  }
+
+  private fun getReadablePermissionName(permission: String): String {
+    return permission.substringAfterLast(".").split("_")
+      .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
+  }
+
+  private fun getPermissionCategory(permission: String): String {
+    return when {
+      permission.contains("CAMERA") -> "Camera"
+      permission.contains("LOCATION") -> "Location"
+      permission.contains("MICROPHONE") || permission.contains("RECORD_AUDIO") -> "Microphone"
+      permission.contains("PHONE") || permission.contains("CALL") -> "Phone"
+      permission.contains("SMS") || permission.contains("MESSAGE") -> "SMS"
+      permission.contains("CONTACTS") -> "Contacts"
+      permission.contains("STORAGE") -> "Storage"
+      else -> "Other"
     }
   }
 

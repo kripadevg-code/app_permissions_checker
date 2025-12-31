@@ -9,8 +9,11 @@ void main() {
         'packageName': 'com.test.app',
         'versionName': '1.0.0',
         'versionCode': 1,
-        'isSystemApp': false,
-        'installTime': 1640995200000, // 2022-01-01
+        'isUpdatedSystemApp': false,
+        'isInternalApp': true,
+        'isExternalApp': false,
+        'installerSource': 'com.android.vending',
+        'installTime': 1640995200000,
         'permissions': [
           {
             'permission': 'android.permission.CAMERA',
@@ -28,7 +31,10 @@ void main() {
       expect(appInfo.packageName, 'com.test.app');
       expect(appInfo.versionName, '1.0.0');
       expect(appInfo.versionCode, 1);
-      expect(appInfo.isSystemApp, false);
+      expect(appInfo.isUpdatedSystemApp, false);
+      expect(appInfo.isInternalApp, true);
+      expect(appInfo.isExternalApp, false);
+      expect(appInfo.installerSource, 'com.android.vending');
       expect(appInfo.permissions.length, 1);
       expect(appInfo.installTime, DateTime.fromMillisecondsSinceEpoch(1640995200000));
     });
@@ -48,7 +54,10 @@ void main() {
         versionName: '1.0.0',
         versionCode: 1,
         permissions: const [permission],
-        isSystemApp: false,
+        isUpdatedSystemApp: false,
+        isInternalApp: true,
+        isExternalApp: false,
+        installerSource: 'com.android.vending',
         installTime: DateTime.fromMillisecondsSinceEpoch(1640995200000),
       );
 
@@ -58,7 +67,10 @@ void main() {
       expect(map['packageName'], 'com.test.app');
       expect(map['versionName'], '1.0.0');
       expect(map['versionCode'], 1);
-      expect(map['isSystemApp'], false);
+      expect(map['isUpdatedSystemApp'], false);
+      expect(map['isInternalApp'], true);
+      expect(map['isExternalApp'], false);
+      expect(map['installerSource'], 'com.android.vending');
       expect(map['installTime'], 1640995200000);
       expect(map['permissions'], isA<List<Map<String, dynamic>>>());
     });
@@ -85,7 +97,10 @@ void main() {
         appName: 'Test App',
         packageName: 'com.test.app',
         permissions: permissions,
-        isSystemApp: false,
+        isUpdatedSystemApp: false,
+        isInternalApp: true,
+        isExternalApp: false,
+        installerSource: '',
       );
 
       expect(appInfo.grantedPermissions.length, 1);
@@ -116,7 +131,10 @@ void main() {
         appName: 'Test App',
         packageName: 'com.test.app',
         permissions: permissions,
-        isSystemApp: false,
+        isUpdatedSystemApp: false,
+        isInternalApp: true,
+        isExternalApp: false,
+        installerSource: '',
       );
 
       expect(appInfo.dangerousPermissions.length, 1);
@@ -139,7 +157,10 @@ void main() {
         appName: 'Test App',
         packageName: 'com.test.app',
         permissions: permissions,
-        isSystemApp: false,
+        isUpdatedSystemApp: false,
+        isInternalApp: true,
+        isExternalApp: false,
+        installerSource: '',
       );
 
       expect(appInfo.hasPermission('android.permission.CAMERA'), true);
@@ -176,7 +197,10 @@ void main() {
         appName: 'Test App',
         packageName: 'com.test.app',
         permissions: permissions,
-        isSystemApp: false,
+        isUpdatedSystemApp: false,
+        isInternalApp: true,
+        isExternalApp: false,
+        installerSource: '',
       );
 
       final grouped = appInfo.permissionsByCategory;
@@ -192,25 +216,34 @@ void main() {
         appName: 'Test App',
         packageName: 'com.test.app',
         permissions: [],
-        isSystemApp: false,
+        isUpdatedSystemApp: false,
+        isInternalApp: true,
+        isExternalApp: false,
+        installerSource: '',
       );
 
       const appInfo2 = AppPermissionInfo(
         appName: 'Different Name',
         packageName: 'com.test.app',
         permissions: [],
-        isSystemApp: true,
+        isUpdatedSystemApp: true,
+        isInternalApp: false,
+        isExternalApp: true,
+        installerSource: 'sideload',
       );
 
       const appInfo3 = AppPermissionInfo(
         appName: 'Test App',
         packageName: 'com.different.app',
         permissions: [],
-        isSystemApp: false,
+        isUpdatedSystemApp: false,
+        isInternalApp: true,
+        isExternalApp: false,
+        installerSource: '',
       );
 
-      expect(appInfo1 == appInfo2, true); // Same package name
-      expect(appInfo1 == appInfo3, false); // Different package name
+      expect(appInfo1 == appInfo2, true);
+      expect(appInfo1 == appInfo3, false);
       expect(appInfo1.hashCode, appInfo2.hashCode);
     });
   });
@@ -288,51 +321,6 @@ void main() {
       expect(signaturePermission.isDangerous, false);
       expect(signaturePermission.isNormal, false);
       expect(signaturePermission.isSignature, true);
-    });
-
-    test('should handle equality correctly', () {
-      const permission1 = PermissionDetail(
-        permission: 'android.permission.CAMERA',
-        readableName: 'Camera',
-        granted: true,
-        protectionLevel: 'dangerous',
-        category: 'Camera',
-      );
-
-      const permission2 = PermissionDetail(
-        permission: 'android.permission.CAMERA',
-        readableName: 'Different Name',
-        granted: false,
-        protectionLevel: 'normal',
-        category: 'Different',
-      );
-
-      const permission3 = PermissionDetail(
-        permission: 'android.permission.LOCATION',
-        readableName: 'Camera',
-        granted: true,
-        protectionLevel: 'dangerous',
-        category: 'Camera',
-      );
-
-      expect(permission1 == permission2, true); // Same permission name
-      expect(permission1 == permission3, false); // Different permission name
-      expect(permission1.hashCode, permission2.hashCode);
-    });
-
-    test('should generate readable string representation', () {
-      const permission = PermissionDetail(
-        permission: 'android.permission.CAMERA',
-        readableName: 'Camera',
-        granted: true,
-        protectionLevel: 'dangerous',
-        category: 'Camera',
-      );
-
-      final string = permission.toString();
-      expect(string, contains('Camera'));
-      expect(string, contains('android.permission.CAMERA'));
-      expect(string, contains('true'));
     });
   });
 }

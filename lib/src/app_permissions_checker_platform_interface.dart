@@ -42,8 +42,10 @@ abstract class AppPermissionsCheckerPlatform extends PlatformInterface {
   ///
   /// When [filterByPermissions] is provided, only apps requesting any of the
   /// given permissions should be returned.
+  /// When [onlyUsefulApps] is true, only external apps and updated system apps are returned.
   Future<List<AppPermissionInfo>> getAllAppsPermissions({
     bool includeSystemApps = false,
+    bool onlyUsefulApps = false,
     List<String> filterByPermissions = const [],
   }) {
     throw UnimplementedError('getAllAppsPermissions() has not been implemented.');

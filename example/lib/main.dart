@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:app_permissions_checker/app_permissions_checker.dart';
 
@@ -117,6 +119,12 @@ class _RootState extends State<_Root> {
         _apps = apps;
         _recomputeStats();
       });
+      List<Map<String, dynamic>> data = [];
+      _apps.forEach((app) {
+        final appMap = app.toMap();
+        data.add(appMap);
+      });
+      log(jsonEncode(data));
     } catch (e) {
       _snack('Error: $e ');
     } finally {

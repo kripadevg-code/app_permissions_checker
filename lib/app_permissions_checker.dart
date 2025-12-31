@@ -214,6 +214,12 @@ class AppPermissionsChecker {
   ///   typically have many permissions and may not be relevant for most
   ///   security analyses.
   ///
+  /// - [onlyUsefulApps]: When `true` and [includeSystemApps] is also `true`,
+  ///   returns only external apps and updated system apps (like YouTube).
+  ///   Excludes pure system apps that haven't been modified by users.
+  ///   This parameter is ignored when [includeSystemApps] is `false`.
+  ///   Defaults to `false`.
+  ///
   /// - [filterByPermissions]: Optional list of specific permissions to filter by.
   ///   When provided, only apps that request at least one of these permissions
   ///   will be included in the results. Useful for targeted security analysis.
@@ -226,13 +232,19 @@ class AppPermissionsChecker {
   /// ## Example
   ///
   /// ```dart
-  /// // Get all user-installed apps
+  /// // Get all user-installed apps (default behavior)
   /// final allApps = await AppPermissionsChecker.getAllAppsPermissions();
   /// print('Found ${allApps.length} user apps');
   ///
-  /// // Include system apps for comprehensive analysis
+  /// // Get external apps + all system apps
   /// final allAppsIncludingSystem = await AppPermissionsChecker.getAllAppsPermissions(
   ///   includeSystemApps: true,
+  /// );
+  ///
+  /// // Get external apps + only updated system apps (like YouTube)
+  /// final usefulApps = await AppPermissionsChecker.getAllAppsPermissions(
+  ///   includeSystemApps: true,
+  ///   onlyUsefulApps: true,
   /// );
   ///
   /// // Filter apps that request location permissions
@@ -268,10 +280,12 @@ class AppPermissionsChecker {
   /// - [checkSingleAppPermissions] for single app analysis
   static Future<List<AppPermissionInfo>> getAllAppsPermissions({
     bool includeSystemApps = false,
+    bool onlyUsefulApps = false,
     List<String> filterByPermissions = const [],
   }) =>
       AppPermissionsCheckerPlatform.instance.getAllAppsPermissions(
         includeSystemApps: includeSystemApps,
+        onlyUsefulApps: onlyUsefulApps,
         filterByPermissions: filterByPermissions,
       );
 
@@ -362,12 +376,14 @@ class AppPermissionsChecker {
   /// ```
   static Future<List<AppPermissionInfo>> getAllAppsPermissionsInBackground({
     bool includeSystemApps = false,
+    bool onlyUsefulApps = false,
     List<String> filterByPermissions = const [],
   }) async {
     // Capture the root isolate token to allow platform messages from the background isolate
     final token = RootIsolateToken.instance;
     return compute(_getAllAppsIsolate, {
       'includeSystemApps': includeSystemApps,
+      'onlyUsefulApps': onlyUsefulApps,
       'filterByPermissions': filterByPermissions,
       'rootIsolateToken': token,
     });
@@ -384,6 +400,7 @@ class AppPermissionsChecker {
 
     return AppPermissionsCheckerPlatform.instance.getAllAppsPermissions(
       includeSystemApps: params['includeSystemApps'] as bool,
+      onlyUsefulApps: params['onlyUsefulApps'] as bool,
       filterByPermissions: (params['filterByPermissions'] as List).cast<String>(),
     );
   }

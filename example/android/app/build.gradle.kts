@@ -9,7 +9,7 @@ android {
     namespace = "com.app_permissions.app_permissions_checker_example"
     compileSdk = flutter.compileSdkVersion
     // Force highest NDK version to satisfy all modules
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
