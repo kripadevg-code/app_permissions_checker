@@ -1,3 +1,49 @@
+## 1.0.4
+
+### 🚀 New Features
+
+- **Enhanced Filtering**: Added `onlyUsefulApps` parameter to filter external apps and updated system apps only
+- **Improved Data Structure**: Permissions field now appears last in JSON output for better debugging experience
+- **Extended Permission Details**: Added `readableName` and `category` fields to all permission objects
+
+### 🔧 Technical Improvements
+
+- **Smart App Classification**: `onlyUsefulApps` parameter only works when `includeSystemApps` is true
+- **Better System App Detection**: Uses only Android's FLAG_SYSTEM for consistent behavior across OEMs
+- **Optimized Field Ordering**: Permissions array moved to end of response for easier debugging
+- **Enhanced Permission Categorization**: Automatic categorization into Camera, Location, Microphone, Phone, SMS, Contacts, Storage, and Other
+
+### 🐛 Bug Fixes
+
+- Fixed Kotlin null safety issues with ApplicationInfo access
+- Resolved trailing comma in JSON output
+- Improved permission filtering logic for better accuracy
+
+### 📚 API Updates
+
+- `getAllAppsPermissions()` now supports `onlyUsefulApps` parameter
+- Permission objects now include `readableName` and `category` fields
+- Enhanced documentation with new parameter usage examples
+
+### 🎯 Usage Examples
+
+```dart
+// Get only useful apps (external + updated system apps like YouTube)
+final usefulApps = await AppPermissionsChecker.getAllAppsPermissions(
+  includeSystemApps: true,
+  onlyUsefulApps: true,
+);
+
+// Filter by specific permissions with useful apps only
+final cameraApps = await AppPermissionsChecker.getAllAppsPermissions(
+  includeSystemApps: true,
+  onlyUsefulApps: true,
+  filterByPermissions: ['android.permission.CAMERA'],
+);
+```
+
+---
+
 ## 1.0.3
 
 ## 1.0.2
